@@ -161,42 +161,50 @@ grsofun_run_byilon <- function(ilon, par, settings){
 
     # Read tidy climate forcing data by longitudinal band and convert units -
     # product-specific
-    if (settings$source_climate == "watch-wfdei"){
+    if (settings$source_climate == "ERA5"){
 
-      vars <- c("Tair", "Rainf", "Snowf", "Qair", "SWdown", "PSurf")
+      vars <- c("t2m", "tp", "vpd_cf", "ssrd", "sp")
 
       # read tidy data for all variables and join into single data frame
       kfFEC <- 2.04
+
       df_climate <- purrr::map(
         vars,
         ~read_forcing_byvar_byilon(., ilon, settings)
       ) |>
+
         purrr::reduce(
           left_join,
           join_by(lon, lat, time)
         ) |>
 
+        # Change NA values to match WATCH data
+        dplyr::mutate(
+          across (-c(lon, lat, time), ~replace_na(.,1.00000002004088e+20))
+        ) |>
+
+        # Transform longitude from 0-360 to -180 to 180
+        dplyr::mutate(
+          lon = if_else(lon > 180, lon - 360, lon)
+        ) |>
+
         # convert units and rename
         dplyr::rowwise() |>
         dplyr::mutate(
-          Tair = Tair - 273.15,  # K -> deg C
-          ppfd = SWdown * kfFEC * 1.0e-6,  # W m-2 -> mol m-2 s-1
-          vapr = calc_vp(
-            qair = Qair,
-            patm = PSurf
-          ),
-          vpd = calc_vpd(
-            eact = vapr,
-            tc = Tair,
-            patm = PSurf
-          )
-        ) |>
+          Tair = t2m - 273.15,  # K -> deg C
+          ssrd= ssrd / 86400, # J m^-2 to W/m²
+          ppfd = ssrd * kfFEC * 1.0e-6,  # J m-2 day-1 -> mol m-2 s-1
+          Rainf = tp * 1000,  # m -> mm
+          vpd = vpd_cf * 100,  # hPa -> Pa
+          PSurf = sp)
+      |>
 
         # XXX try
         mutate(
           netrad = NA,
           ccov = 0.5,
           co2 = 400,
+          snow= 0 # no data
         ) |>
         dplyr::select(
           lon,
@@ -208,7 +216,6 @@ grsofun_run_byilon <- function(ilon, par, settings){
           ppfd,
           netrad,
           ccov,
-          snow = Snowf,
           co2,
           patm = PSurf,
           tmin = Tair,
