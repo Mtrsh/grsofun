@@ -194,7 +194,7 @@ grsofun_run_byilon <- function(ilon, par, settings){
           Tair = t2m - 273.15,  # K -> deg C
           ssrd= ssrd / 86400, # J m^-2 to W/m²
           ppfd = ssrd * kfFEC * 1.0e-6,  # J m-2 day-1 -> mol m-2 s-1
-          Rainf = tp * 1000,  # m -> mm
+          Rainf = tp * 1000 / 86400, # m of water equivalent -> kg/m2/s over a day
           vpd = vpd_cf * 100,  # hPa -> Pa
           PSurf = sp)
       |>
