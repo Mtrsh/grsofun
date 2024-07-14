@@ -37,17 +37,17 @@ grsofun_tidy <- function(settings){
 
 
   # climate
-  if (settings$source_climate == "watch-wfdei"){
+  if (settings$source_climate == "ERA5"){
 
     # data-product specific variable names
-    vars <- c("Tair", "Rainf", "Snowf", "Qair", "SWdown", "PSurf")
+    vars <- c("t2m", "tp", "vpd_cf", "ssrd", "sp")
 
     # define grid of climate files
     settings$grid_climate <- list(
       lonnam = "lon",
       latnam = "lat",
-      timenam = "timestp",
-      timedimnam = "tstep"
+      timenam = "time",
+      timedimnam = "time"
     )
 
     # make files tidy for each variable
@@ -83,7 +83,7 @@ grsofun_tidy_byvar <- function(var, settings){
 
   # consider data product-specific directory structure and netcdf variable and
   # dimension names
-  if (settings$source_climate == "watch-wfdei"){
+  if (settings$source_climate == "ERA5"){
     list_filnams <- list.files(
       paste0(settings$dir_climate, "/", var, "_daily/"),
       pattern = ".nc",
@@ -101,7 +101,7 @@ grsofun_tidy_byvar <- function(var, settings){
     timedimnam = settings$grid_climate$timedimnam,
     do_chunks = TRUE,
     outdir = settings$dir_climate_tidy,
-    fileprefix = paste0(var, "_daily_WFDEI"),
+    fileprefix = paste0(var, "_daily_ERA5"),
     single_basedate = FALSE,
     overwrite = settings$overwrite
     # ncores = 2  # parallel::detectCores()
