@@ -165,8 +165,8 @@ grsofun_run_byilon <- function(ilon, par, settings){
 
       vars <- c("t2m", "tp", "vpd_cf", "ssrd", "sp")
 
+       kfFEC <- 2.04
       # read tidy data for all variables and join into single data frame
-      kfFEC <- 2.04
 
       df_climate <- purrr::map(
         vars,
@@ -180,23 +180,19 @@ grsofun_run_byilon <- function(ilon, par, settings){
 
         # Change NA values to match WATCH data
         dplyr::mutate(
-          across (-c(lon, lat, time), ~replace_na(.,1.00000002004088e+20))
-        ) |>
-
-        # Transform longitude from 0-360 to -180 to 180
-        dplyr::mutate(
-          lon = if_else(lon > 180, lon - 360, lon)
-        ) |>
-
+          across (-c(lon, lat, time), ~ifelse(. == -9999, NA, .) %>%
+                    replace_na(1.00000002004088e+20)))
+      |>
         # convert units and rename
         dplyr::rowwise() |>
         dplyr::mutate(
           Tair = t2m - 273.15,  # K -> deg C
-          ssrd= ssrd / 86400, # J m^-2 to W/m²
-          ppfd = ssrd * kfFEC * 1.0e-6,  # J m-2 day-1 -> mol m-2 s-1
-          Rainf = tp * 1000 / 86400, # m of water equivalent -> kg/m2/s over a day
+          ssrd= ssrd * (1 / 0.0864), # MJ m^-2 to W/m²
+          ppfd = ssrd * kfFEC * 1.0e-6,  # W m-2 -> mol m-2 s-1
+          Rainf = tp / 86400, # mm  -> kg/m2/s over a day (ongoing)
           vpd = vpd_cf * 100,  # hPa -> Pa
-          PSurf = sp)
+          PSurf = sp * 100,  # hPa -> Pa
+          )
       |>
 
         # XXX try
@@ -204,7 +200,10 @@ grsofun_run_byilon <- function(ilon, par, settings){
           netrad = NA,
           ccov = 0.5,
           co2 = 400,
-          snow= 0 # no data
+          snow= 0, # no data
+          tmin= 0, # no data
+          tmax= 0, # no data
+
         ) |>
         dplyr::select(
           lon,
@@ -217,9 +216,7 @@ grsofun_run_byilon <- function(ilon, par, settings){
           netrad,
           ccov,
           co2,
-          patm = PSurf,
-          tmin = Tair,
-          tmax = Tair
+          patm = PSurf
         ) |>
 
         dplyr::group_by(lon, lat) |>
@@ -521,8 +518,8 @@ grsofun_run_byilon <- function(ilon, par, settings){
 
 read_forcing_byvar_byilon <- function(var, ilon, settings){
 
-  if (settings$source_climate == "watch-wfdei"){
-    df <- read_rds(paste0(settings$dir_climate, "/tidy/", var, "_daily_WFDEI_ilon_", ilon, ".rds")) |>
+  if (settings$source_climate == "ERA5"){
+    df <- read_rds(paste0(settings$dir_climate, "/tidy/", var, "_daily_ERA5_ilon_", ilon, ".rds")) |>
     tidyr::unnest(data)
   }
 
