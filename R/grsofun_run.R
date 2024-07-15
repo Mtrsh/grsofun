@@ -181,8 +181,7 @@ grsofun_run_byilon <- function(ilon, par, settings){
         # Change NA values to match WATCH data
         dplyr::mutate(
           across (-c(lon, lat, time), ~ifelse(. == -9999, NA, .) %>%
-                    replace_na(1.00000002004088e+20)))
-      |>
+                    replace_na(1.00000002004088e+20))) |>
         # convert units and rename
         dplyr::rowwise() |>
         dplyr::mutate(
@@ -192,8 +191,7 @@ grsofun_run_byilon <- function(ilon, par, settings){
           Rainf = tp / 86400, # mm  -> kg/m2/s over a day (ongoing)
           vpd = vpd_cf * 100,  # hPa -> Pa
           PSurf = sp * 100,  # hPa -> Pa
-          )
-      |>
+          )|>
 
         # XXX try
         mutate(

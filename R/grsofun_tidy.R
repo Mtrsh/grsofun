@@ -18,6 +18,8 @@ grsofun_tidy <- function(settings){
     varnam = "cwdx80_forcing",
     lonnam = "lon",
     latnam = "lat",
+    timenam = NA,
+    timedimnam = NA,
     do_chunks = TRUE,
     outdir = settings$dir_whc_tidy,
     fileprefix = "cwdx80_forcing_halfdeg",
@@ -40,7 +42,7 @@ grsofun_tidy <- function(settings){
   if (settings$source_climate == "ERA5"){
 
     # data-product specific variable names
-    vars <- c("t2m", "tp", "vpd_cf", "ssrd", "sp")
+    vars <- c("Tair", "Rainf", "Vpd", "SWdown", "PSurf")
 
     # define grid of climate files
     settings$grid_climate <- list(
@@ -109,3 +111,4 @@ grsofun_tidy_byvar <- function(var, settings){
 
   return(error)
 }
+

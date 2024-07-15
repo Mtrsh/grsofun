@@ -31,8 +31,11 @@ Load libraries for this vignette.
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(purrr)
+library(map2tidy)
 library(rnaturalearth)
 library(cowplot)
+
 ```
 
 ### Specify settings
@@ -51,18 +54,18 @@ settings <- list(
     dlat = 0.5,
     len_ilat = 360
     ),
-  source_climate = "watch-wfdei",  # a string specifying climate forcing dataset-specific variables
-  dir_climate = "~/data/watch_wfdei", # path to where climate forcing data is located
-  dir_climate_tidy = "~/data/watch_wfdei/tidy/",  # path to where tidy climate forcing data is to be written
-  source_fapar = "modis",   # a string specifying fAPAR forcing dataset-specific variables
-  file_fapar = "~/data/MODIS-C006_MOD15A2_LAI_FPAR_zmaw/MODIS-C006_MOD15A2__LAI_FPAR__LPDAAC__GLOBAL_0.5degree__UHAM-ICDC__2000_2018__MON__fv0.02.nc",  # path to where fAPAR forcing data is located
-  dir_fapar_tidy = "~/data/MODIS-C006_MOD15A2_LAI_FPAR_zmaw/tidy/",  # path to where tidy fAPAR forcing data is to be written
-  file_whc = "~/data/mct_data/cwdx80_forcing_halfdeg.nc",  # path to where root zone storage capacity forcing data is located
-  dir_whc_tidy = "~/data/mct_data/tidy/",  # path to where tidy  root zone storage capacity forcing data is to be written
-  file_landmask = "~/data/archive_legacy/landmasks/WFDEI-elevation.nc",    # path to where land mask data is located
-  dir_landmask_tidy = "~/data/archive_legacy/landmasks/WFDEI-elevation_tidy/",    # path to where tidy land mask data is to be written
-  file_elv = "~/data/archive_legacy/landmasks/WFDEI-elevation.nc",   # path to where elevation data is located
-  dir_elv_tidy = "~/data/archive_legacy/landmasks/WFDEI-elevation_tidy/",   # path to where tidy elevation data is to be written
+  source_climate = "ERA5",
+  dir_climate = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/ERA5",
+  dir_climate_tidy = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/ERA5/tidy",
+  source_fapar = "modis",
+  file_fapar = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/fapar/MODIS-C006_MOD15A2_LAI_FPAR_zmaw/MODIS-C006_MOD15A2__LAI_FPAR__LPDAAC__GLOBAL_0.5degree__UHAM-ICDC__2000_2018__MON__fv0.02.nc",
+  dir_fapar_tidy = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/fapar/MODIS-C006_MOD15A2_LAI_FPAR_zmaw/tidy/",
+  file_whc = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/mtc_data/cwdx80_forcing_halfdeg.nc",
+  dir_whc_tidy = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/mtc_data/tidy/",
+  file_landmask = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/elevation/WFDEI-elevation.nc",
+  dir_landmask_tidy = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/elevation/WFDEI-elevation_tidy/",
+  file_elv = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/elevation/WFDEI-elevation.nc",
+  dir_elv_tidy = "/Net/Groups/BGI/scratch/mterristi/PhD/Pmodel/grsofun/data/elevation/WFDEI-elevation_tidy/",
   save_drivers = TRUE,   # whether rsofun driver object is to be saved. Uses additional disk space but substantially speeds up grsofun_run().
   dir_drivers = here::here("input/tidy/"),  # path where rsofun drivers are to be written
   overwrite = FALSE,    # whether files with tidy forcing data and drivers are to be overwritten. If false, reads files if available instead of re-creating them.
